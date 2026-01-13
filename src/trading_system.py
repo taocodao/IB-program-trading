@@ -600,6 +600,8 @@ class TradingSystem(EClient, EWrapper):
                 
                 self.closed_trades.append(pos)
                 del self.positions[key]
+                if pos.symbol in self.traded_symbols:
+                    self.traded_symbols.discard(pos.symbol)
                 self.positions_closed += 1
     
     def run_loop(self, max_iterations: int = 100):
