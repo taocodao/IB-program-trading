@@ -14,6 +14,7 @@ Set LIVE_MODE = True to place real orders (paper trading only!)
 """
 
 import sys
+import os
 import time
 import logging
 from pathlib import Path
@@ -67,8 +68,8 @@ except ImportError as e:
 # ============= Configuration =============
 
 LIVE_MODE = True            # Paper trading enabled!
-IB_HOST = "127.0.0.1"
-IB_PORT = 7497              # Paper trading port
+IB_HOST = os.getenv("IB_HOST", "127.0.0.1")
+IB_PORT = int(os.getenv("IB_PORT", 7497))
 IB_CLIENT_ID = 300
 
 # Screener settings
