@@ -1,0 +1,91 @@
+version: '3.8'
+
+# Production Docker Compose for AWS EC2
+# Run with: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  # Redis for signal distribution
+  redis:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # IB Gateway (headless TWS)
+  ib-gateway:
+    image: ghcr.io/gnzsnz/ib-gateway:latest
+    restart: always
+    environment:
+      - TWS_USERID=${TWS_USERID}
+      - TWS_PASSWORD=${TWS_PASSWORD}
+      - TRADING_MODE=${TRADING_MODE:-paper}
+      - IB_API_PORT=4001
+    volumes:
+      - ./ib_config:/root/ibc
+    ports:
+      - "5900:5900"  # VNC for debugging
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "4001"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # API Server (FastAPI + Privy Auth)
+  api-server:
+    build: .
+    command: python -m uvicorn src.api_server:app --host 0.0.0.0 --port 8000
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_URL=${DB_URL}
+      - REDIS_URL=redis://redis:6379
+      - PRIVY_APP_ID=${PRIVY_APP_ID}
+      - PRIVY_APP_SECRET=${PRIVY_APP_SECRET}
+      - IB_ENCRYPTION_KEY=${IB_ENCRYPTION_KEY}
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Trading System (main bot)
+  trading-system:
+    build: .
+    command: python src/trading_system.py
+    restart: always
+    environment:
+      - DB_URL=${DB_URL}
+      - REDIS_URL=redis://redis:6379
+      - IB_HOST=ib-gateway
+      - IB_PORT=4001
+    depends_on:
+      ib-gateway:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Dashboard (Flask)
+  dashboard:
+    build: .
+    command: python src/dashboard.py
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_URL=${DB_URL}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - api-server
+      - redis
+
+volumes:
+  redis_data:

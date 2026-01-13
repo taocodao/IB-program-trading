@@ -1,0 +1,40 @@
+2026-01-09 00:25:16,308 - __main__ - INFO - ======================================================================
+2026-01-09 00:25:16,308 - __main__ - INFO - OPTIONS TRAILING STOP-LOSS MANAGER
+2026-01-09 00:25:16,308 - __main__ - INFO - ======================================================================
+2026-01-09 00:25:16,308 - __main__ - INFO - Configuration: Trail=10%, Update Interval=2s
+2026-01-09 00:25:16,309 - __main__ - INFO - 
+2026-01-09 00:25:16,309 - __main__ - INFO - Connecting to 127.0.0.1:7497 (client ID: 100)...
+2026-01-09 00:25:16,314 - ibapi.client - INFO - sent startApi
+2026-01-09 00:25:16,314 - ibapi.client - INFO - REQUEST startApi {}
+2026-01-09 00:25:16,314 - ibapi.client - INFO - SENDING startApi b'\x00\x00\x00\n71\x002\x00100\x00\x00'
+2026-01-09 00:25:16,315 - ibapi.wrapper - INFO - ANSWER connectAck {}
+2026-01-09 00:25:16,318 - __main__ - INFO - Connected to IB. Next valid order ID: 1
+2026-01-09 00:25:16,319 - __main__ - INFO - Market Data: Market data farm connection is OK:usfarm.nj
+2026-01-09 00:25:16,319 - __main__ - INFO - Market Data: Market data farm connection is OK:usfuture
+2026-01-09 00:25:16,319 - __main__ - INFO - Market Data: Market data farm connection is OK:usopt.nj
+2026-01-09 00:25:16,320 - ibapi.wrapper - INFO - ANSWER managedAccounts {'accountsList': 'DUK782510'}
+2026-01-09 00:25:16,320 - __main__ - INFO - Market Data: Market data farm connection is OK:cashfarm
+2026-01-09 00:25:16,320 - __main__ - INFO - Market Data: Market data farm connection is OK:usopt
+2026-01-09 00:25:16,320 - __main__ - INFO - Market Data: Market data farm connection is OK:usfarm
+2026-01-09 00:25:16,321 - __main__ - INFO - Market Data: HMDS data farm connection is OK:ushmds
+2026-01-09 00:25:16,321 - __main__ - INFO - Market Data: Sec-def data farm connection is OK:secdefnj
+2026-01-09 00:25:18,317 - __main__ - INFO - Connected successfully!
+2026-01-09 00:25:18,317 - __main__ - INFO - Requesting portfolio positions...
+2026-01-09 00:25:18,317 - ibapi.client - INFO - REQUEST reqPositions {}
+2026-01-09 00:25:18,318 - ibapi.client - INFO - SENDING reqPositions b'\x00\x00\x00\x0561\x001\x00'
+2026-01-09 00:25:18,323 - __main__ - INFO - Position loading complete. Found 0 option positions
+2026-01-09 00:25:21,323 - __main__ - INFO - Starting position monitoring loop...
+2026-01-09 00:25:21,323 - __main__ - INFO - 
+2026-01-09 00:25:21,324 - __main__ - INFO - Monitoring is now ACTIVE. Press Ctrl+C to stop.
+2026-01-09 00:25:21,324 - __main__ - INFO - 
+2026-01-09 00:26:20,934 - __main__ - INFO - [Check #60] 0 positions, 0 active stops
+2026-01-09 00:27:21,510 - __main__ - INFO - [Check #120] 0 positions, 0 active stops
+2026-01-09 00:27:52,329 - __main__ - ERROR - Connection lost to TWS!
+2026-01-09 00:27:52,591 - __main__ - ERROR - Connection lost to TWS!
+2026-01-09 00:27:59,858 - __main__ - ERROR - Connection lost to TWS!
+2026-01-09 00:28:02,327 - ibapi.client - INFO - disconnecting
+2026-01-09 00:28:02,327 - __main__ - ERROR - Connection to TWS/IB Gateway closed!
+2026-01-09 00:28:02,922 - __main__ - INFO - Stopping monitoring...
+2026-01-09 00:28:02,953 - __main__ - INFO - Monitoring loop ended.
+2026-01-09 00:28:03,933 - __main__ - INFO - Cancelling pending stop orders...
+2026-01-09 00:28:04,943 - __main__ - INFO - Disconnected. Shutdown complete.

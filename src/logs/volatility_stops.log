@@ -1,0 +1,95 @@
+2026-01-09 10:51:21,281 - __main__ - INFO - ======================================================================
+2026-01-09 10:51:21,282 - __main__ - INFO - VOLATILITY-AWARE OPTIONS STOP-LOSS MANAGER
+2026-01-09 10:51:21,282 - __main__ - INFO - ======================================================================
+2026-01-09 10:51:21,283 - __main__ - INFO - Config: k=1.0, trail=[4%-40%]
+2026-01-09 10:51:21,283 - __main__ - INFO - 
+2026-01-09 10:51:21,283 - __main__ - INFO - Connecting to 127.0.0.1:7497 (client ID: 101)...
+2026-01-09 10:51:21,381 - ibapi.client - INFO - sent startApi
+2026-01-09 10:51:21,382 - ibapi.client - INFO - REQUEST startApi {}
+2026-01-09 10:51:21,382 - ibapi.client - INFO - SENDING startApi b'\x00\x00\x00\n71\x002\x00101\x00\x00'
+2026-01-09 10:51:21,383 - ibapi.wrapper - INFO - ANSWER connectAck {}
+2026-01-09 10:51:21,399 - __main__ - INFO - Connected to IB. Next order ID: 1
+2026-01-09 10:51:21,400 - ibapi.wrapper - INFO - ANSWER managedAccounts {'accountsList': 'DUK782510'}
+2026-01-09 10:51:21,403 - __main__ - INFO - Market Data: Market data farm connection is OK:cashfarm
+2026-01-09 10:51:21,403 - __main__ - INFO - Market Data: Market data farm connection is OK:usfuture
+2026-01-09 10:51:21,403 - __main__ - INFO - Market Data: Market data farm connection is OK:usopt.nj
+2026-01-09 10:51:21,403 - __main__ - INFO - Market Data: Market data farm connection is OK:usfarm.nj
+2026-01-09 10:51:21,404 - __main__ - INFO - Market Data: Market data farm connection is OK:usfarm
+2026-01-09 10:51:21,404 - __main__ - INFO - Market Data: Market data farm connection is OK:usopt
+2026-01-09 10:51:21,404 - __main__ - INFO - Market Data: HMDS data farm connection is OK:euhmds
+2026-01-09 10:51:21,405 - __main__ - INFO - Market Data: HMDS data farm connection is OK:fundfarm
+2026-01-09 10:51:21,406 - __main__ - INFO - Market Data: HMDS data farm connection is OK:ushmds
+2026-01-09 10:51:21,406 - __main__ - INFO - Market Data: Sec-def data farm connection is OK:secdefnj
+2026-01-09 10:51:23,388 - __main__ - INFO - Connected successfully!
+2026-01-09 10:51:23,389 - __main__ - INFO - Requesting positions...
+2026-01-09 10:51:23,389 - ibapi.client - INFO - REQUEST reqPositions {}
+2026-01-09 10:51:23,389 - ibapi.client - INFO - SENDING reqPositions b'\x00\x00\x00\x0561\x001\x00'
+2026-01-09 10:51:23,394 - __main__ - INFO - Position loading complete. Found 0 option positions
+2026-01-09 10:51:23,394 - ibapi.client - INFO - REQUEST reqMktData {'reqId': 9999, 'contract': 2176580328688: 0,VIX,IND,,0.0,,,CBOE,,USD,,,False,,combo:, 'genericTickList': '', 'snapshot': False, 'regulatorySnapshot': False, 'mktDataOptions': []}
+2026-01-09 10:51:23,395 - ibapi.client - INFO - SENDING reqMktData b'\x00\x00\x00/1\x0011\x009999\x000\x00VIX\x00IND\x00\x000.0\x00\x00\x00CBOE\x00\x00USD\x00\x00\x000\x00\x000\x000\x00\x00'
+2026-01-09 10:51:23,395 - __main__ - INFO - Subscribed to VIX for volatility tracking
+2026-01-09 10:51:23,510 - __main__ - ERROR - Error 354: Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Delayed market data is available.VIX CBOE Volatility Index/TOP/ALL
+2026-01-09 10:51:26,398 - __main__ - INFO - Starting volatility-aware monitoring loop...
+2026-01-09 10:51:26,398 - __main__ - INFO - 
+2026-01-09 10:51:26,399 - __main__ - INFO - Monitoring ACTIVE. Press Ctrl+C to stop.
+2026-01-09 10:51:26,399 - __main__ - INFO - 
+2026-01-09 10:51:30,734 - __main__ - INFO - Shutting down...
+2026-01-09 10:51:30,735 - __main__ - INFO - Stopping...
+2026-01-09 10:51:31,467 - __main__ - INFO - Monitoring loop ended.
+2026-01-09 10:51:32,758 - ibapi.client - INFO - disconnecting
+2026-01-09 10:51:32,758 - __main__ - ERROR - Connection to TWS closed!
+2026-01-09 10:51:32,758 - __main__ - INFO - Stopped.
+2026-01-09 15:29:58,889 - __main__ - INFO - ======================================================================
+2026-01-09 15:29:58,889 - __main__ - INFO - VOLATILITY-AWARE OPTIONS STOP-LOSS MANAGER
+2026-01-09 15:29:58,889 - __main__ - INFO - ======================================================================
+2026-01-09 15:29:58,890 - __main__ - INFO - Config: k=1.0, trail=[4%-40%]
+2026-01-09 15:29:58,890 - __main__ - INFO - 
+2026-01-09 15:29:58,890 - __main__ - INFO - Connecting to 127.0.0.1:7497 (client ID: 101)...
+2026-01-09 15:29:58,895 - ibapi.client - INFO - sent startApi
+2026-01-09 15:29:58,896 - ibapi.client - INFO - REQUEST startApi {}
+2026-01-09 15:29:58,896 - ibapi.client - INFO - SENDING startApi b'\x00\x00\x00\n71\x002\x00101\x00\x00'
+2026-01-09 15:29:58,896 - ibapi.wrapper - INFO - ANSWER connectAck {}
+2026-01-09 15:29:58,899 - ibapi.wrapper - INFO - ANSWER managedAccounts {'accountsList': 'DUK782510'}
+2026-01-09 15:29:58,899 - __main__ - INFO - Connected to IB. Next order ID: 1
+2026-01-09 15:29:58,900 - __main__ - INFO - Market Data: Market data farm connection is OK:cashfarm
+2026-01-09 15:29:58,900 - __main__ - INFO - Market Data: Market data farm connection is OK:usfuture
+2026-01-09 15:29:58,901 - __main__ - INFO - Market Data: Market data farm connection is OK:usopt.nj
+2026-01-09 15:29:58,901 - __main__ - INFO - Market Data: Market data farm connection is OK:usfarm.nj
+2026-01-09 15:29:58,901 - __main__ - INFO - Market Data: Market data farm connection is OK:usfarm
+2026-01-09 15:29:58,901 - __main__ - INFO - Market Data: Market data farm connection is OK:usopt
+2026-01-09 15:29:58,901 - __main__ - INFO - Market Data: HMDS data farm connection is OK:euhmds
+2026-01-09 15:29:58,902 - __main__ - INFO - Market Data: HMDS data farm connection is OK:fundfarm
+2026-01-09 15:29:58,902 - __main__ - INFO - Market Data: HMDS data farm connection is OK:ushmds
+2026-01-09 15:29:58,902 - __main__ - INFO - Market Data: Sec-def data farm connection is OK:secdefnj
+2026-01-09 15:30:00,906 - __main__ - INFO - Connected successfully!
+2026-01-09 15:30:00,906 - __main__ - INFO - Requesting positions...
+2026-01-09 15:30:00,907 - ibapi.client - INFO - REQUEST reqPositions {}
+2026-01-09 15:30:00,907 - ibapi.client - INFO - SENDING reqPositions b'\x00\x00\x00\x0561\x001\x00'
+2026-01-09 15:30:00,909 - __main__ - INFO - Position loading complete. Found 0 option positions
+2026-01-09 15:30:00,909 - ibapi.client - INFO - REQUEST reqMktData {'reqId': 9999, 'contract': 2293918936864: 0,VIX,IND,,0.0,,,CBOE,,USD,,,False,,combo:, 'genericTickList': '', 'snapshot': False, 'regulatorySnapshot': False, 'mktDataOptions': []}
+2026-01-09 15:30:00,909 - ibapi.client - INFO - SENDING reqMktData b'\x00\x00\x00/1\x0011\x009999\x000\x00VIX\x00IND\x00\x000.0\x00\x00\x00CBOE\x00\x00USD\x00\x00\x000\x00\x000\x000\x00\x00'
+2026-01-09 15:30:00,910 - __main__ - INFO - Subscribed to VIX for volatility tracking
+2026-01-09 15:30:01,053 - __main__ - ERROR - Error 354: Requested market data is not subscribed. Check API status by selecting the Account menu then under Management choose Market Data Subscription Manager and/or availability of delayed data.Delayed market data is available.VIX CBOE Volatility Index/TOP/ALL
+2026-01-09 15:30:03,922 - __main__ - INFO - Starting volatility-aware monitoring loop...
+2026-01-09 15:30:03,922 - __main__ - INFO - 
+2026-01-09 15:30:03,922 - __main__ - INFO - Monitoring ACTIVE. Press Ctrl+C to stop.
+2026-01-09 15:30:03,923 - __main__ - INFO - 
+2026-01-09 15:31:03,529 - __main__ - INFO - [CHECK #60] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:32:04,085 - __main__ - INFO - [CHECK #120] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:33:04,699 - __main__ - INFO - [CHECK #180] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:34:05,257 - __main__ - INFO - [CHECK #240] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:35:05,873 - __main__ - INFO - [CHECK #300] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:36:06,452 - __main__ - INFO - [CHECK #360] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:37:07,065 - __main__ - INFO - [CHECK #420] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:38:07,692 - __main__ - INFO - [CHECK #480] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:39:08,280 - __main__ - INFO - [CHECK #540] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:40:08,836 - __main__ - INFO - [CHECK #600] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:41:09,446 - __main__ - INFO - [CHECK #660] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:42:10,019 - __main__ - INFO - [CHECK #720] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:43:10,622 - __main__ - INFO - [CHECK #780] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:44:11,219 - __main__ - INFO - [CHECK #840] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:45:11,796 - __main__ - INFO - [CHECK #900] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:46:12,305 - __main__ - INFO - [CHECK #960] 0 tracking, 0 triggered | VIX: N/A, Vol: 1.20%
+2026-01-09 15:46:40,814 - __main__ - INFO - Shutting down...
+2026-01-09 15:46:40,815 - __main__ - INFO - Stopping...
+2026-01-09 15:46:41,582 - __main__ - INFO - Monitoring loop ended.
