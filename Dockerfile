@@ -20,6 +20,7 @@ RUN pip install ibapi
 # Copy source code
 COPY src/ ./src/
 COPY exported-assets/config.py ./exported-assets/
+COPY watchlist.csv .
 
 # Setup Environment
 ENV PYTHONPATH=/app/src

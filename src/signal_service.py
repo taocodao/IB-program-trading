@@ -231,21 +231,32 @@ class SignalSubscriber:
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("Signal Distribution Service")
+    print("Signal Distribution Service - STARTING")
     print("=" * 60)
     
     service = SignalService()
     
-    # Health check
-    health = service.health_check()
-    print(f"\nHealth: {health}")
-    
-    # Refresh symbols
-    symbols = service.refresh_active_symbols()
-    print(f"\nActive symbols from all watchlists: {symbols}")
-    
-    # Show cached signals
-    cached = service.get_all_cached_signals()
-    print(f"\nCached signals: {len(cached)}")
-    for symbol, signal in cached.items():
-        print(f"  {symbol}: {signal['signal_type']} (score: {signal['score']})")
+    running = True
+    while running:
+        try:
+            # 1. Refresh active symbols from DB
+            service.refresh_active_symbols()
+            
+            # 2. In a real scenario, we'd fetch market data here.
+            # For now, we'll just log that we are alive.
+            # To make this fully functional, we need a market data source (IB Gateway or Polygon).
+            # If IB Gateway is available via `ib-gateway-data` service, we could fetch snapshots.
+            
+            logger.info("Heartbeat: Signal Service is running...")
+            
+            health = service.health_check()
+            logger.info(f"Health: {health}")
+            
+            time.sleep(60) 
+            
+        except KeyboardInterrupt:
+            running = False
+            print("Stopping...")
+        except Exception as e:
+            logger.error(f"Main loop error: {e}")
+            time.sleep(10)
