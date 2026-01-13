@@ -66,7 +66,7 @@ services:
       - DB_URL=${DB_URL}
       - REDIS_URL=redis://redis:6379
       - IB_HOST=ib-gateway-data
-      - IB_PORT=4002
+      - IB_PORT=4004
     volumes:
       - ./src:/app/src
     depends_on:
@@ -78,12 +78,16 @@ services:
     image: ghcr.io/gnzsnz/ib-gateway:latest
     restart: unless-stopped
     ports:
-      - "4002:4002"
+      - "4004:4004"
       - "5901:5900"
     environment:
       - TWS_USERID=${TWS_USERID}
       - TWS_PASSWORD=${TWS_PASSWORD}
       - TRADING_MODE=paper
+      - TWS_ACCEPT_INCOMING=accept
+      - READ_ONLY_API=no
+      - TWOFA_TIMEOUT_ACTION=restart
+      - RELOGIN_AFTER_TWOFA_TIMEOUT=yes
     volumes:
       - ./ib_config:/root/ibc
   
