@@ -52,6 +52,15 @@ except ImportError as e:
     logger.warning(f"AI signals not available: {e}")
     AI_SIGNALS_AVAILABLE = False
 
+# Import VCP + ML indicators
+try:
+    from indicators import VCPMLSignalGenerator, analyze_vcp
+    VCP_ML_AVAILABLE = True
+    logger.info("VCP + ML indicators loaded")
+except ImportError as e:
+    logger.warning(f"VCP+ML indicators not available: {e}")
+    VCP_ML_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 

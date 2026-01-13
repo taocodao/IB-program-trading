@@ -19,6 +19,13 @@ from typing import Optional, Tuple, List, Dict
 from enum import Enum
 import logging
 
+# VCP + ML Indicators integration
+try:
+    from indicators import VCPMLSignalGenerator, VCPDetector, analyze_vcp
+    VCP_ML_AVAILABLE = True
+except ImportError:
+    VCP_ML_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -671,6 +678,96 @@ class AISignalGenerator:
             if hasattr(self.config, key):
                 setattr(self.config, key, value)
                 logger.info(f"Config updated: {key} = {value}")
+    
+    def generate_signal_with_vcp(
+        self,
+        df: pd.DataFrame,
+        symbol: str,
+        timeframe: str = "5m"
+    ) -> SignalResult:
+        """
+        Generate enhanced signal using VCP + ML indicators.
+        
+        Combines VCP breakout detection with existing SuperTrend/RSI/MFI
+        analysis for higher confidence signals (80%+).
+        
+        Args:
+            df: DataFrame with 'open', 'high', 'low', 'close', 'volume' columns
+            symbol: Stock symbol
+            timeframe: Timeframe string
+            
+        Returns:
+            SignalResult with VCP-enhanced scoring
+        """
+        # First, generate the standard signal
+        base_signal = self.generate_signal_from_data(df, symbol, timeframe)
+        
+        # If VCP+ML not available, return base signal
+        if not VCP_ML_AVAILABLE:
+            logger.debug("VCP+ML indicators not available, using base signal")
+            return base_signal
+        
+        # Extract numpy arrays from DataFrame
+        high = df['high'].values
+        low = df['low'].values
+        close = df['close'].values
+        volume = df['volume'].values
+        
+        # Check for VCP patterns
+        try:
+            vcp_result = analyze_vcp(high, low, close, volume)
+            
+            if vcp_result['has_signal']:
+                # VCP breakout detected - boost confidence
+                vcp_confidence = vcp_result['confidence']
+                vcp_signal_type = vcp_result['signal_type']
+                
+                logger.info(f"{symbol}: VCP breakout detected - {vcp_signal_type} @ {vcp_confidence:.0f}%")
+                
+                # Check if VCP agrees with base signal
+                base_is_bullish = base_signal.signal_type == SignalType.BUY_CALL
+                base_is_bearish = base_signal.signal_type == SignalType.BUY_PUT
+                vcp_is_bullish = vcp_signal_type == 'BUY_CALL'
+                vcp_is_bearish = vcp_signal_type == 'BUY_PUT'
+                
+                # Calculate combined score
+                agreement_boost = 0
+                if (base_is_bullish and vcp_is_bullish) or (base_is_bearish and vcp_is_bearish):
+                    # Both agree - strong signal
+                    agreement_boost = 15
+                    base_signal.reasons.append(f"🎯 VCP Breakout confirms direction (+15% confidence)")
+                elif base_signal.signal_type == SignalType.NO_SIGNAL:
+                    # Use VCP signal when base has no signal
+                    agreement_boost = 10
+                    base_signal.reasons.insert(0, f"🚀 VCP Breakout detected: {vcp_signal_type}")
+                    # Update signal type based on VCP
+                    base_signal.signal_type = SignalType.BUY_CALL if vcp_is_bullish else SignalType.BUY_PUT
+                else:
+                    # Conflicting signals - add note but don't boost
+                    base_signal.reasons.append(f"⚠️ VCP suggests {vcp_signal_type} (conflicts with base signal)")
+                
+                # Update consensus score
+                combined_score = (base_signal.consensus_score * 0.6) + (vcp_confidence * 0.4) + agreement_boost
+                base_signal.consensus_score = min(combined_score, 95)
+                
+                # Update execution thresholds
+                base_signal.should_auto_execute = (
+                    self.config.auto_execute_enabled and
+                    base_signal.consensus_score >= self.config.auto_execute_threshold
+                )
+                base_signal.requires_approval = (
+                    base_signal.consensus_score >= self.config.min_score_threshold and
+                    not base_signal.should_auto_execute
+                )
+                
+            elif vcp_result['active_zones'] > 0:
+                # VCP zones found but no breakout yet
+                base_signal.reasons.append(f"📊 VCP: {vcp_result['active_zones']} consolidation zone(s) forming")
+                
+        except Exception as e:
+            logger.warning(f"{symbol}: VCP analysis error: {e}")
+        
+        return base_signal
 
 
 # ============= Module-level convenience functions =============
@@ -688,6 +785,15 @@ def get_generator() -> AISignalGenerator:
 def generate_signal(df: pd.DataFrame, symbol: str, timeframe: str = "5m") -> SignalResult:
     """Convenience function to generate signal using default generator."""
     return get_generator().generate_signal_from_data(df, symbol, timeframe)
+
+
+def generate_signal_enhanced(df: pd.DataFrame, symbol: str, timeframe: str = "5m") -> SignalResult:
+    """
+    Convenience function to generate VCP-enhanced signal.
+    
+    Uses VCP + ML indicators for higher confidence (80%+) signals.
+    """
+    return get_generator().generate_signal_with_vcp(df, symbol, timeframe)
 
 
 # ============= CLI Testing =============
