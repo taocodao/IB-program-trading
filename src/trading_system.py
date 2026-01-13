@@ -23,6 +23,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 import pandas as pd
 import threading
+import json
+import redis
 
 # Add paths
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -43,6 +45,29 @@ from screener.formulas import (
 from screener.indicators import get_all_indicators
 
 logger = logging.getLogger(__name__)
+
+# Redis connection for publishing signals to dashboard
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+try:
+    redis_client = redis.from_url(REDIS_URL, decode_responses=True)
+    redis_client.ping()
+    REDIS_AVAILABLE = True
+    logger.info(f"Connected to Redis at {REDIS_URL}")
+except:
+    redis_client = None
+    REDIS_AVAILABLE = False
+    logger.warning("Redis not available - signals won't be cached for dashboard")
+
+def publish_signal_to_redis(symbol: str, signal_data: dict):
+    """Publish signal to Redis for dashboard consumption."""
+    if not REDIS_AVAILABLE:
+        return
+    try:
+        signal_json = json.dumps(signal_data)
+        redis_client.setex(f"signal_cache:{symbol}", 300, signal_json)  # 5 min TTL
+        redis_client.publish("signals:all", signal_json)
+    except Exception as e:
+        logger.debug(f"Redis publish error: {e}")
 
 # Import AI signal modules
 try:
@@ -454,6 +479,15 @@ class TradingSystem(EClient, EWrapper):
         
         try:
             signal = self.ai_generator.generate_signal_from_data(df, symbol)
+            
+            # Publish to Redis for dashboard
+            publish_signal_to_redis(symbol, {
+                'symbol': symbol,
+                'score': signal.consensus_score,
+                'signal_type': signal.signal_type.value,
+                'reasons': signal.reasons,
+                'timestamp': datetime.now().isoformat()
+            })
             
             # Check if score meets threshold
             if signal.consensus_score < min_score:
