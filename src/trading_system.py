@@ -41,6 +41,8 @@ from screener.formulas import (
 )
 from screener.indicators import get_all_indicators
 
+logger = logging.getLogger(__name__)
+
 # Import AI signal modules
 try:
     from ai_signal_generator import AISignalGenerator, SignalType
@@ -60,8 +62,6 @@ try:
 except ImportError as e:
     logger.warning(f"VCP+ML indicators not available: {e}")
     VCP_ML_AVAILABLE = False
-
-logger = logging.getLogger(__name__)
 
 
 # ============= Configuration =============
