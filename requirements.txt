@@ -17,3 +17,5 @@ cryptography
 pyjwt
 httpx
 pydantic-settings
+flask
+scikit-learn
