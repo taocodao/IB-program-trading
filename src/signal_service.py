@@ -62,6 +62,20 @@ class SignalService:
     def refresh_active_symbols(self):
         """Get all unique symbols across all user watchlists."""
         self.active_symbols = self.db.get_all_active_symbols()
+        
+        # Fallback to watchlist.csv if DB is empty (common in single-user setups)
+        if not self.active_symbols:
+            try:
+                watchlist_path = Path("watchlist.csv")
+                if watchlist_path.exists():
+                    df = pd.read_csv(watchlist_path)
+                    if "Symbol" in df.columns:
+                        symbols = set(df["Symbol"].astype(str).str.strip().str.upper().tolist())
+                        self.active_symbols.update(symbols)
+                        logger.info(f"Loaded {len(symbols)} symbols from watchlist.csv")
+            except Exception as e:
+                logger.error(f"Failed to load watchlist.csv: {e}")
+
         logger.info(f"Active symbols: {len(self.active_symbols)}")
         return self.active_symbols
     
