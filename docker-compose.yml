@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # ============= SHARED SERVICES =============
+  
+  # PostgreSQL (can use external RDS instead)
+  # postgres:
+  #   image: postgres:15
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: ib_trading
+  #     POSTGRES_USER: ${DB_USER}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  
+  # Redis for signal distribution
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+  
+  # API Server (FastAPI + Privy Auth)
+  api-server:
+    build: .
+    command: python -m uvicorn src.api_server:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_URL=${DB_URL}
+      - REDIS_URL=redis://redis:6379
+      - PRIVY_APP_ID=${PRIVY_APP_ID}
+      - PRIVY_APP_SECRET=${PRIVY_APP_SECRET}
+      - IB_ENCRYPTION_KEY=${IB_ENCRYPTION_KEY}
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - redis
+  
+  # Signal Generation Service
+  signal-service:
+    build: .
+    command: python src/signal_service.py
+    restart: unless-stopped
+    environment:
+      - DB_URL=${DB_URL}
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - redis
+      - ib-gateway-data
+  
+  # IB Gateway for market data only (shared)
+  ib-gateway-data:
+    image: ghcr.io/gnzsnz/ib-gateway:latest
+    restart: unless-stopped
+    ports:
+      - "4001:4001"
+      - "5901:5900"
+    environment:
+      - TWS_USERID=${TWS_USERID}
+      - TWS_PASSWORD=${TWS_PASSWORD}
+      - TRADING_MODE=paper
+      - IB_API_PORT=4001
+    volumes:
+      - ./ib_config:/root/ibc
+  
+  # Streamlit Dashboard
+  dashboard:
+    build: .
+    command: streamlit run src/dashboard.py --server.port 8501
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - DB_URL=${DB_URL}
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - api-server
+      - redis
+  
+  # ============= PER-USER GATEWAYS =============
+  # These are spawned dynamically by gateway_manager.py
+  # Example template for manual setup:
+  
+  # ib-gateway-user1:
+  #   image: ghcr.io/gnzsnz/ib-gateway:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - "4002:4001"
+  #   environment:
+  #     - TWS_USERID=${USER1_TWS_USERID}
+  #     - TWS_PASSWORD=${USER1_TWS_PASSWORD}
+  #     - TRADING_MODE=paper
+
+volumes:
+  redis_data:
+  # postgres_data:
