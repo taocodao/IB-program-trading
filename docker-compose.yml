@@ -72,13 +72,13 @@ services:
     volumes:
       - ./ib_config:/root/ibc
   
-  # Streamlit Dashboard
+  # Flask Dashboard
   dashboard:
     build: .
-    command: streamlit run src/dashboard.py --server.port 8501
+    command: python src/dashboard.py
     restart: unless-stopped
     ports:
-      - "8501:8501"
+      - "8501:5000"
     environment:
       - DB_URL=${DB_URL}
       - REDIS_URL=redis://redis:6379
