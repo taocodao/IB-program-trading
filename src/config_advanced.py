@@ -108,6 +108,12 @@ MAX_LOSS_PCT_TOTAL = float(os.getenv("MAX_LOSS_PCT_TOTAL", "0.30"))       # 30%
 # Daily portfolio-wide loss limit
 MAX_DAILY_PORTFOLIO_LOSS_PCT = float(os.getenv("MAX_DAILY_PORTFOLIO_LOSS_PCT", "0.025"))
 
+# ============= RL ENHANCEMENT =============
+
+ENABLE_RL_AGENTS = os.getenv("ENABLE_RL_AGENTS", "True").lower() in ("true", "1", "yes")
+RL_MODEL_DIR = os.getenv("RL_MODEL_DIR", "checkpoints/rl")
+RL_MIN_CONFIDENCE = float(os.getenv("RL_MIN_CONFIDENCE", "0.60"))
+
 # ============= DTE MULTIPLIERS (4-LEVEL) =============
 # Refined DTE adjustments for gamma-aware stop sizing
 

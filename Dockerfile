@@ -21,6 +21,7 @@ RUN pip install ibapi
 COPY src/ ./src/
 COPY exported-assets/config.py ./exported-assets/
 COPY watchlist.csv .
+COPY checkpoints/ ./checkpoints/
 
 # Setup Environment
 ENV PYTHONPATH=/app/src

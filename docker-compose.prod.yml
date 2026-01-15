@@ -67,6 +67,7 @@ services:
       - REDIS_URL=redis://redis:6379
       - IB_HOST=ib-gateway
       - IB_PORT=4001
+      - ENABLE_RL_AGENTS=True
     depends_on:
       ib-gateway:
         condition: service_healthy

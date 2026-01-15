@@ -1,0 +1,23 @@
+========================================
+TensorFlow Installation Script
+========================================
+
+Checking Python version...
+Python 3.10.7
+
+Upgrading pip...
+C:\Python310\python.exe: No module named pip
+
+Installing TensorFlow...
+C:\Python310\python.exe: No module named pip
+
+Verifying installation...
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'tensorflow'
+
+========================================
+Installation Complete
+========================================
+Press any key to continue . . . 
+Terminate batch job (Y/N)? Terminate batch job (Y/N)? 

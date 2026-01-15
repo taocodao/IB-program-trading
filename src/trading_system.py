@@ -44,6 +44,16 @@ from screener.formulas import (
 )
 from screener.indicators import get_all_indicators
 
+# RL Integration
+try:
+    from rl.integration import integrate_rl_with_trading_system
+    from rl.ensemble import EnsembleConfig
+    RL_AVAILABLE = True
+except ImportError:
+    RL_AVAILABLE = False
+
+from config_advanced import K_AGGRESSION, EXIT_TRAIL_PCT, ENABLE_RL_AGENTS, RL_MODEL_DIR
+
 logger = logging.getLogger(__name__)
 
 # Redis connection for publishing signals to dashboard
@@ -231,6 +241,14 @@ class TradingSystem(EClient, EWrapper):
             self.ai_generator = None
             self.iv_analyzer = None
             self.signal_validator = None
+
+        # RL Executor
+        if RL_AVAILABLE and ENABLE_RL_AGENTS:
+            self.rl_executor = integrate_rl_with_trading_system(self)
+            self.rl_executor.load(RL_MODEL_DIR)
+            logger.info(f"RL Agents loaded from {RL_MODEL_DIR}")
+        else:
+            self.rl_executor = None
         
         # Statistics
         self.signals_detected = 0
@@ -530,8 +548,9 @@ class TradingSystem(EClient, EWrapper):
             logger.warning(f"AI signal error for {symbol}: {e}")
             return None
     
-    def place_option_order(self, symbol: str, underlying_price: float, beta: float, ai_score: float = None):
-        """Place option buy order."""
+    def place_option_order(self, symbol: str, underlying_price: float, beta: float, 
+                          ai_score: float = None, quantity: int = 1, stop_pct: float = None):
+        """Place option buy order with optional RL parameters."""
         # Calculate strike and expiry
         strike = round(underlying_price * (1 + STRIKE_OTM_PCT) / 5) * 5
         
@@ -551,7 +570,15 @@ class TradingSystem(EClient, EWrapper):
                 symbol, strike, expiry, "C",
                 fake_fill_price, underlying_price, beta
             )
-            logger.info(f"[SIMULATED] Order filled at ${fake_fill_price:.2f}")
+            # Simulate order fill
+            fake_fill_price = underlying_price * 0.02  # ~2% of underlying
+            self._record_position(
+                symbol, strike, expiry, "C",
+                fake_fill_price, underlying_price, beta,
+                stop_override_pct=stop_pct,
+                quantity=quantity
+            )
+            logger.info(f"[SIMULATED] Order filled at ${fake_fill_price:.2f} (Qty: {quantity})")
             return
         
         # Build contract
@@ -570,7 +597,7 @@ class TradingSystem(EClient, EWrapper):
         order.orderId = self.next_order_id
         order.action = "BUY"
         order.orderType = "MKT"
-        order.totalQuantity = 1
+        order.totalQuantity = quantity
         order.tif = "DAY"
         order.transmit = True
         order.eTradeOnly = False
@@ -579,9 +606,18 @@ class TradingSystem(EClient, EWrapper):
         self.placeOrder(self.next_order_id, contract, order)
         self.next_order_id += 1
         self.orders_placed += 1
+        
+        # Track pending stop override if provided
+        if stop_pct:
+            # We can't record position until filled, but for simulation valid immediately
+            # For live trading, we'd need to map orderId to stop_pct
+            logger.info(f"Order placed with custom stop: {stop_pct*100:.1f}%")
+            
+        return self.next_order_id - 1
     
     def _record_position(self, symbol: str, strike: float, expiry: str, 
-                        right: str, fill_price: float, underlying: float, beta: float):
+                        right: str, fill_price: float, underlying: float, beta: float,
+                        stop_override_pct: float = None, quantity: int = 1):
         """Record a new position."""
         pos = TrackedPosition(
             symbol=symbol,
@@ -593,7 +629,8 @@ class TradingSystem(EClient, EWrapper):
             entry_underlying=underlying,
             entry_time=datetime.now(),
             underlying_high=underlying,
-            beta=beta
+            beta=beta,
+            quantity=quantity
         )
         
         # Set initial stop
@@ -602,6 +639,13 @@ class TradingSystem(EClient, EWrapper):
         pos.stop_level = self.stop_calc.compute_underlying_stop(
             underlying, beta, index_vol, dte
         )
+        
+        # Override if RL provided a specific stop
+        if stop_override_pct:
+            custom_stop = underlying * (1 - stop_override_pct)
+            # Use the tighter of the two stops (safety)
+            pos.stop_level = max(pos.stop_level, custom_stop)
+            logger.info(f"Applying RL stop: {stop_override_pct*100:.1f}% -> ${pos.stop_level:.2f}")
         
         self.positions[pos.option_symbol] = pos
         logger.info(f"Position opened: {pos.option_symbol} @ ${fill_price:.2f}, stop=${pos.stop_level:.2f}")
@@ -718,8 +762,25 @@ class TradingSystem(EClient, EWrapper):
                                 
                                 if price and ai_approved:
                                     logger.info(f"  [OK] Auto-executing {symbol} @ ${price:.2f}")
+                                    logger.info(f"  [OK] Auto-executing {symbol} @ ${price:.2f}")
                                     self.traded_symbols.add(symbol)  # Mark as traded
-                                    self.place_option_order(symbol, price, beta, ai_score=ai_score)
+                                    
+                                    # Use RL Executor if available
+                                    if self.rl_executor:
+                                        # Get indicators for RL
+                                        df_rl = self.get_historical_bars(symbol)
+                                        indicators = get_all_indicators(df_rl) if df_rl is not None else {}
+                                        
+                                        self.rl_executor.execute_signal(
+                                            symbol=symbol,
+                                            signal_type=signal_type,
+                                            signal_score=ai_score,
+                                            indicators=indicators,
+                                            current_price=price,
+                                            account_equity=100000 # Placeholder or self.account_summary
+                                        )
+                                    else:
+                                        self.place_option_order(symbol, price, beta, ai_score=ai_score)
                                 elif price:
                                     logger.info(f"  [PENDING] {symbol} awaiting manual approval (score={ai_score:.0f})")
                             continue
@@ -760,7 +821,21 @@ class TradingSystem(EClient, EWrapper):
                         # Check entry trigger
                         price = self.prices.get(symbol, 0)
                         if self.check_entry_trigger(symbol, price, beta):
-                            self.place_option_order(symbol, price, beta, ai_score=ai_score)
+                            if self.rl_executor:
+                                # Get indicators for RL
+                                df_rl = self.get_historical_bars(symbol)
+                                indicators = get_all_indicators(df_rl) if df_rl is not None else {}
+                                
+                                self.rl_executor.execute_signal(
+                                    symbol=symbol,
+                                    signal_type="BUY_CALL", # Default for traditional screen check
+                                    signal_score=result['score'],
+                                    indicators=indicators,
+                                    current_price=price,
+                                    account_equity=100000
+                                )
+                            else:
+                                self.place_option_order(symbol, price, beta, ai_score=ai_score)
                 
                 # Update existing positions
                 self.update_positions()

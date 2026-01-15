@@ -19,3 +19,4 @@ httpx
 pydantic-settings
 flask
 scikit-learn
+tensorflow>=2.13.0
