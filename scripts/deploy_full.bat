@@ -77,17 +77,22 @@ if %ERRORLEVEL% NEQ 0 (
 echo [OK] Code updated on server.
 echo.
 
-:: ===== STEP 3: Docker Restart =====
-echo [STEP 3/4] Restarting Docker services on EC2...
+:: ===== STEP 3: Setup/Start Services =====
+echo [STEP 3/4] Checking dependencies and starting services...
 echo.
 
-ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && docker-compose -f docker-compose.prod.yml up -d --build"
+:: We execute a composite command:
+:: 1. Fix line endings on deploy.sh (CRLF issue)
+:: 2. Check if docker-compose exists
+:: 3. If missing -> Run deploy.sh (Setup)
+:: 4. If present -> Run docker-compose up (Update)
+ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && sed -i 's/\r$//' deploy.sh && if ! command -v docker-compose &> /dev/null; then echo 'First run detected. Installing dependencies...'; chmod +x deploy.sh && sudo ./deploy.sh; else echo 'Updating services...'; docker-compose -f docker-compose.prod.yml up -d --build; fi"
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Docker restart failed. Check server logs.
+    echo [ERROR] Service start failed. Check server logs.
     pause
     exit /b 1
 )
-echo [OK] Docker services restarted.
+echo [OK] Services are running.
 echo.
 
 :: ===== STEP 4: Verify =====
