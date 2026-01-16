@@ -81,12 +81,16 @@ echo.
 echo [STEP 3/4] Checking dependencies and starting services...
 echo.
 
-:: We execute a composite command:
-:: 1. Fix line endings on deploy.sh (CRLF issue)
-:: 2. Check if docker-compose exists
-:: 3. If missing -> Run deploy.sh (Setup)
-:: 4. If present -> Run docker-compose up (Update)
-ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && sed -i 's/\r$//' deploy.sh && if ! command -v docker-compose &> /dev/null; then echo 'First run detected. Installing dependencies...'; chmod +x deploy.sh && sudo ./deploy.sh; else echo 'Updating services...'; docker-compose -f docker-compose.prod.yml up -d --build; fi"
+:: 1. Fix line endings
+ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && sed -i 's/\r$//' deploy.sh"
+
+:: 2. Check and Install (if needed)
+ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "if ! command -v docker-compose &> /dev/null; then echo 'Installing dependencies...'; cd %REMOTE_DIR%; chmod +x deploy.sh; sudo ./deploy.sh; fi"
+
+:: 3. Update and Restart
+echo Restarting containers...
+ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && docker-compose -f docker-compose.prod.yml up -d --build"
+
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Service start failed. Check server logs.
     pause
