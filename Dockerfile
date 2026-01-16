@@ -13,9 +13,9 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 
 # Install Python dependencies
-# Note: ibapi usually installed from manual wheel or git, here assuming standard pip or local
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install ibapi
+# Combine pip installs to reduce layers
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir ibapi
 
 # Copy source code
 COPY src/ ./src/

@@ -90,6 +90,8 @@ ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "if ! command -v docker &> /dev/null; th
 
 :: 3. Update and Restart
 echo Restarting containers...
+:: Run cleanup first to ensure space for build
+ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "docker system prune -f"
 :: Use 'docker compose' (v2) instead of 'docker-compose' (v1)
 ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && docker compose -f docker-compose.prod.yml up -d --build"
 
