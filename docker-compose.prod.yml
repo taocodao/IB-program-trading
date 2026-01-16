@@ -30,7 +30,7 @@ services:
     ports:
       - "5900:5900"  # VNC for debugging
     healthcheck:
-      test: ["CMD", "nc", "-z", "127.0.0.1", "4002"]
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/127.0.0.1/4002' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 10
