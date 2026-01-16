@@ -85,11 +85,13 @@ echo.
 ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && sed -i 's/\r$//' deploy.sh"
 
 :: 2. Check and Install (if needed)
-ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "if ! command -v docker-compose &> /dev/null; then echo 'Installing dependencies...'; cd %REMOTE_DIR%; chmod +x deploy.sh; sudo ./deploy.sh; fi"
+:: We check for 'docker' command. If missing, run setup.
+ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "if ! command -v docker &> /dev/null; then echo 'Installing dependencies...'; cd %REMOTE_DIR%; chmod +x deploy.sh; sudo ./deploy.sh; fi"
 
 :: 3. Update and Restart
 echo Restarting containers...
-ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && docker-compose -f docker-compose.prod.yml up -d --build"
+:: Use 'docker compose' (v2) instead of 'docker-compose' (v1)
+ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && docker compose -f docker-compose.prod.yml up -d --build"
 
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Service start failed. Check server logs.
@@ -103,7 +105,7 @@ echo.
 echo [STEP 4/4] Verifying deployment...
 echo.
 
-ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && docker-compose -f docker-compose.prod.yml ps"
+ssh -i "%KEY_FILE%" %EC2_USER%@%EC2_IP% "cd %REMOTE_DIR% && docker compose -f docker-compose.prod.yml ps"
 
 echo.
 echo ========================================================
